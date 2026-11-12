@@ -3,11 +3,21 @@
 from __future__ import annotations
 
 import os
+import sys
+from pathlib import Path
+
+# Ensure repository root is on sys.path for Streamlit Cloud deployment
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 import requests
 import streamlit as st
 
-from ui.components import render_chart_component, render_sources_inspector, render_sql_inspector
+try:
+    from ui.components import render_chart_component, render_sources_inspector, render_sql_inspector
+except ImportError:
+    from components import render_chart_component, render_sources_inspector, render_sql_inspector
 
 st.set_page_config(
     page_title="Chat with Your Business Data",
