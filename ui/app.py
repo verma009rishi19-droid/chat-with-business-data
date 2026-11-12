@@ -30,13 +30,13 @@ except ImportError:
     )
 
 st.set_page_config(
-    page_title="NexusBI | Autonomous Enterprise Intelligence",
+    page_title="NexusBI | Chat with Your Business Data",
     page_icon="🌌",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# Custom High-End Cyber/Data Theme & Animations
+# Custom High-End Cyber/Data Theme & Live Animated Background
 CUSTOM_CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
@@ -49,21 +49,48 @@ code, pre, [class*="stCode"] {
     font-family: 'JetBrains Mono', monospace !important;
 }
 
-/* Animations */
+/* --- LIVE ANIMATED CHAT PANEL BACKGROUND --- */
+.stApp {
+    background:
+        radial-gradient(circle at 10% 15%, rgba(0, 242, 254, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 90% 85%, rgba(79, 172, 254, 0.06) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.04) 0%, transparent 60%),
+        linear-gradient(180deg, #070A12 0%, #0B0F19 50%, #0D1322 100%) !important;
+    background-attachment: fixed !important;
+}
+
+/* Subtle moving data mesh grid overlay */
+div[data-testid="stMainBlockContainer"] {
+    background-image:
+        radial-gradient(rgba(0, 242, 254, 0.07) 1px, transparent 1px),
+        linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px);
+    background-size: 36px 36px, 100% 72px;
+    background-position: 0 0;
+    animation: liveDataGrid 30s linear infinite;
+    border-radius: 16px;
+}
+
+@keyframes liveDataGrid {
+    0% { background-position: 0 0, 0 0; }
+    100% { background-position: 360px 360px, 0 720px; }
+}
+
+/* Keyframe Animations */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes pulseGlow {
-    0% { box-shadow: 0 0 0 0 rgba(0, 242, 254, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(0, 242, 254, 0); }
+    0% { box-shadow: 0 0 0 0 rgba(0, 242, 254, 0.45); }
+    70% { box-shadow: 0 0 0 12px rgba(0, 242, 254, 0); }
     100% { box-shadow: 0 0 0 0 rgba(0, 242, 254, 0); }
 }
 
-@keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+@keyframes titleShimmer {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 /* Hero Branding Card */
@@ -72,27 +99,49 @@ code, pre, [class*="stCode"] {
     border: 1px solid rgba(0, 242, 254, 0.25);
     border-radius: 16px;
     padding: 24px 28px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5), 0 0 24px rgba(0, 242, 254, 0.08);
     animation: fadeIn 0.5s ease-out;
 }
 
 .nexus-title {
-    font-size: 2.1rem;
+    font-size: 2.2rem;
     font-weight: 800;
     letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #FFFFFF 30%, #00F2FE 100%);
+    background: linear-gradient(135deg, #FFFFFF 20%, #00F2FE 70%, #4FACFE 100%);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 6px;
+    animation: titleShimmer 6s ease infinite;
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
+.nexus-badge {
+    font-size: 0.72rem;
+    background: rgba(0, 242, 254, 0.12);
+    border: 1px solid rgba(0, 242, 254, 0.35);
+    color: #00F2FE;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
 .nexus-subtitle {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #38BDF8;
+    letter-spacing: -0.01em;
+    margin-top: 4px;
+    margin-bottom: 6px;
+}
+
+.nexus-desc {
     color: #94A3B8;
-    font-size: 0.96rem;
+    font-size: 0.92rem;
     font-weight: 400;
     line-height: 1.5;
 }
@@ -101,15 +150,15 @@ code, pre, [class*="stCode"] {
 .telemetry-strip {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 24px;
+    gap: 12px;
+    margin-bottom: 22px;
 }
 
 .telemetry-card {
-    background: rgba(17, 24, 39, 0.7);
+    background: rgba(17, 24, 39, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
-    padding: 14px 18px;
+    padding: 12px 16px;
     transition: all 0.25s ease;
 }
 
@@ -120,16 +169,16 @@ code, pre, [class*="stCode"] {
 }
 
 .telemetry-label {
-    font-size: 0.74rem;
+    font-size: 0.72rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: #94A3B8;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .telemetry-value {
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: #F8FAFC;
     letter-spacing: -0.02em;
@@ -149,7 +198,8 @@ div[data-testid="stSidebarHeader"] {
 .stChatMessage {
     animation: fadeIn 0.35s ease-out;
     border-radius: 12px !important;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(17, 24, 39, 0.6) !important;
 }
 
 /* Prompt Button Micro-interactions */
@@ -177,8 +227,22 @@ div.stButton > button:hover {
 div[data-testid="stExpander"] {
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-radius: 10px !important;
-    background: rgba(15, 23, 42, 0.4) !important;
+    background: rgba(15, 23, 42, 0.45) !important;
     margin-top: 8px !important;
+}
+
+/* File Uploader Container Styling */
+div[data-testid="stFileUploader"] {
+    border: 1px dashed rgba(0, 242, 254, 0.35);
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 10px;
+    transition: all 0.25s ease;
+}
+
+div[data-testid="stFileUploader"]:hover {
+    border-color: #00F2FE;
+    box-shadow: 0 0 16px rgba(0, 242, 254, 0.15);
 }
 </style>
 """
@@ -394,6 +458,8 @@ if "thread_id" not in st.session_state:
     st.session_state.thread_id = None
 if "pending_clarification" not in st.session_state:
     st.session_state.pending_clarification = None
+if "uploaded_summary" not in st.session_state:
+    st.session_state.uploaded_summary = None
 
 # --- SIDEBAR NAVIGATION & TELEMETRY ---
 with st.sidebar:
@@ -402,13 +468,13 @@ with st.sidebar:
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
             <div style="
                 background: linear-gradient(135deg, #00F2FE, #4FACFE);
-                height: 36px; width: 36px; border-radius: 10px;
+                height: 38px; width: 38px; border-radius: 10px;
                 display: flex; align-items: center; justify-content: center;
-                font-size: 1.25rem; font-weight: 800; color: #0F172A;
+                font-size: 1.3rem; font-weight: 800; color: #0F172A;
                 box-shadow: 0 0 16px rgba(0, 242, 254, 0.4);
             ">N</div>
             <div>
-                <div style="font-weight: 800; font-size: 1.2rem; color: #F8FAFC; letter-spacing: -0.01em;">NexusBI</div>
+                <div style="font-weight: 800; font-size: 1.25rem; color: #F8FAFC; letter-spacing: -0.01em;">NexusBI</div>
                 <div style="font-size: 0.72rem; color: #00F2FE; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;">Autonomous Intelligence</div>
             </div>
         </div>
@@ -465,6 +531,7 @@ with st.sidebar:
         st.session_state.messages = []
         st.session_state.thread_id = None
         st.session_state.pending_clarification = None
+        st.session_state.uploaded_summary = None
         st.rerun()
 
 
@@ -473,22 +540,15 @@ st.markdown(
     """
     <div class="nexus-hero">
         <div class="nexus-title">
-            <span>✨ NexusBI</span>
-            <span style="
-                font-size: 0.72rem;
-                background: rgba(0, 242, 254, 0.12);
-                border: 1px solid rgba(0, 242, 254, 0.3);
-                color: #00F2FE;
-                padding: 4px 10px;
-                border-radius: 20px;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-                font-weight: 700;
-            ">v1.0 Production</span>
+            <span>🌌 NexusBI</span>
+            <span class="nexus-badge">v1.2 Enterprise</span>
         </div>
         <div class="nexus-subtitle">
+            Chat with Your Business Data
+        </div>
+        <div class="nexus-desc">
             Autonomous multi-agent intelligence assistant connecting relational data warehouses,
-            vectorized corporate knowledge, and zero-code Plotly telemetry graphs.
+            vectorized corporate knowledge, and uploaded enterprise datasets.
         </div>
     </div>
     """,
@@ -573,8 +633,72 @@ if st.session_state.pending_clarification:
                     except Exception as e:
                         st.error(f"Failed to resume analytics: {e}")
 
+# --- DATASET UPLOADER ACCORDION IN INPUT PANEL ---
+with st.expander("📁 Upload Custom Dataset (.csv, .xlsx, .parquet, .json)", expanded=False):
+    st.markdown(
+        """
+        <div style="font-size: 0.85rem; color: #94A3B8; margin-bottom: 8px;">
+            Upload any business dataset (sales, logs, inventory, customers). NexusBI will parse its data types,
+            register it inside the SQL warehouse, and make it instantly queryable in natural language.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    uploaded_file = st.file_uploader(
+        "Choose a dataset file",
+        type=["csv", "xlsx", "xls", "parquet", "json"],
+        key="custom_dataset_file",
+        label_visibility="collapsed",
+    )
+
+    if uploaded_file is not None:
+        file_signature = f"{uploaded_file.name}_{uploaded_file.size}"
+        if st.session_state.get("last_uploaded_sig") != file_signature:
+            with st.spinner(f"Ingesting '{uploaded_file.name}' into SQL warehouse..."):
+                file_bytes = uploaded_file.getvalue()
+                from app.db.dataset_uploader import ingest_user_dataset
+
+                ingest_res = ingest_user_dataset(
+                    filename=uploaded_file.name,
+                    file_bytes=file_bytes,
+                )
+                if ingest_res.get("success"):
+                    st.session_state.last_uploaded_sig = file_signature
+                    st.session_state.uploaded_summary = ingest_res
+                    st.toast(f"✅ Table '{ingest_res['table_name']}' registered in warehouse!", icon="📊")
+                else:
+                    st.error(f"Dataset upload failed: {ingest_res.get('error', 'Unknown error')}")
+
+    if st.session_state.get("uploaded_summary"):
+        summary = st.session_state.uploaded_summary
+        cols_formatted = ", ".join([f"<code>{c['name']}</code> ({c['dtype']})" for c in summary["columns"][:6]])
+        st.markdown(
+            f"""
+            <div style="
+                background: rgba(16, 185, 129, 0.1);
+                border: 1px solid rgba(16, 185, 129, 0.3);
+                border-radius: 8px;
+                padding: 10px 14px;
+                margin-top: 10px;
+            ">
+                <div style="color: #34D399; font-weight: 700; font-size: 0.9rem;">
+                    ✓ Active Table: <code>{summary['table_name']}</code> ({summary['row_count']:,} rows, {summary['column_count']} columns)
+                </div>
+                <div style="margin-top: 6px; font-size: 0.78rem; color: #CBD5E1;">
+                    <strong>Detected Attributes:</strong> {cols_formatted}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
 # Process Chat Input
-user_prompt = st.chat_input("Ask a business question in natural language...") or selected_sample
+chat_placeholder = "Ask a business question in natural language..."
+if st.session_state.get("uploaded_summary"):
+    tbl = st.session_state.uploaded_summary["table_name"]
+    chat_placeholder = f"Ask questions about warehouse or your uploaded table '{tbl}'..."
+
+user_prompt = st.chat_input(chat_placeholder) or selected_sample
 
 if user_prompt and not st.session_state.pending_clarification:
     # Add user message to history

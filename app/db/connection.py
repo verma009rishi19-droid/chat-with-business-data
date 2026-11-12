@@ -41,6 +41,13 @@ def get_engine(readonly: bool = True) -> Engine:
             max_overflow=10,
             pool_pre_ping=True,
         )
+        try:
+            with engine.connect() as test_conn:
+                test_conn.execute(text("SELECT 1"))
+        except Exception as e:
+            logger.warning("PostgreSQL unreachable (%s). Auto-fallback to SQLite warehouse.", e)
+            settings.DB_TYPE = "sqlite"
+            return get_engine(readonly=readonly)
     else:
         # SQLite configuration
         connect_args["check_same_thread"] = False
