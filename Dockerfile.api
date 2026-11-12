@@ -1,0 +1,43 @@
+# Multi-stage production Dockerfile for FastAPI Analytics Backend
+FROM python:3.11-slim AS builder
+
+WORKDIR /build
+
+# Install build dependencies for C-extensions (psycopg2, sqlglot)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Final Runtime Image
+FROM python:3.11-slim AS runtime
+
+WORKDIR /app
+
+# Install runtime PostgreSQL client library and curl for healthcheck
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy installed python packages from builder
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Copy application source code
+COPY app/ app/
+COPY data/ data/
+COPY docs_kb/ docs_kb/
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+CMD ["uvicorn", "app.api.routes:app", "--host", "0.0.0.0", "--port", "8000"]

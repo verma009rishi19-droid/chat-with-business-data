@@ -1,0 +1,36 @@
+# Python Dependencies for Chat with Your Business Data
+# Core Orchestration & AI
+langgraph>=0.2.70
+langchain>=0.3.18
+langchain-core>=0.3.35
+langchain-community>=0.3.17
+langchain-google-genai>=2.0.9
+google-genai>=1.0.0
+
+# Database & SQL Validation
+sqlglot>=26.0.0
+psycopg2-binary>=2.9.9
+sqlalchemy>=2.0.36
+pandas>=2.2.0
+
+# Vector Store & Embeddings
+chromadb>=0.5.23
+
+# API & Web UI
+fastapi>=0.115.0
+uvicorn>=0.32.0
+pydantic>=2.10.0
+pydantic-settings>=2.7.0
+streamlit>=1.42.0
+plotly>=5.24.0
+
+# Observability
+langfuse>=2.57.0
+
+# Testing & Quality
+pytest>=8.3.0
+pytest-asyncio>=0.24.0
+pytest-mock>=3.14.0
+ruff>=0.8.0
+python-dotenv>=1.0.1
+httpx>=0.28.0

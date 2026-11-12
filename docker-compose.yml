@@ -1,0 +1,93 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: business_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: business_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./data/init-roles.sql:/docker-entrypoint-initdb.d/01-init-roles.sql
+      - ./data/schema.sql:/docker-entrypoint-initdb.d/02-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d business_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - business_net
+
+  chroma:
+    image: chromadb/chroma:0.5.23
+    container_name: business_chroma
+    restart: always
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+      - ANONYMIZED_TELEMETRY=FALSE
+    networks:
+      - business_net
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: business_api
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_TYPE=postgres
+      - DATABASE_URL=postgresql://postgres:postgrespassword@postgres:5432/business_db
+      - DATABASE_READONLY_URL=postgresql://readonly_analyst:readonly_pass@postgres:5432/business_db
+      - STATEMENT_TIMEOUT_MS=5000
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.5-flash}
+      - OBSERVABILITY_PROVIDER=${OBSERVABILITY_PROVIDER:-none}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
+      - LANGFUSE_HOST=${LANGFUSE_HOST:-https://cloud.langfuse.com}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - business_net
+
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    container_name: business_ui
+    restart: always
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - business_net
+
+volumes:
+  postgres_data:
+  chroma_data:
+
+networks:
+  business_net:
+    driver: bridge
