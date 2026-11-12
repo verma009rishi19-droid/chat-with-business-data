@@ -140,6 +140,12 @@ def get_or_create_collection(
         name=name,
         metadata={"hnsw:space": "cosine"},
     )
+    if collection.count() == 0:
+        try:
+            logger.info("Chroma collection '%s' is empty. Ingesting knowledge base...", name)
+            ingest_knowledge_base(persist_dir=path)
+        except Exception as e:
+            logger.warning("Auto-ingestion of knowledge base skipped: %s", e)
     return collection
 
 

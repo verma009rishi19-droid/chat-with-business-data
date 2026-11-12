@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Generator
 from contextlib import contextmanager
+from pathlib import Path
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Connection, Engine
@@ -44,6 +45,14 @@ def get_engine(readonly: bool = True) -> Engine:
         # SQLite configuration
         connect_args["check_same_thread"] = False
         connect_args["timeout"] = 15
+        sqlite_file = Path(settings.SQLITE_DB_PATH)
+        if not sqlite_file.exists():
+            try:
+                from app.db.loader import load_data_warehouse
+                logger.info("SQLite database %s not found. Initializing warehouse...", sqlite_file)
+                load_data_warehouse(target="sqlite")
+            except Exception as e:
+                logger.warning("Auto-init of SQLite warehouse encountered: %s", e)
         engine = create_engine(db_url, connect_args=connect_args)
 
     if readonly:
